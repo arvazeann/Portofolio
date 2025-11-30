@@ -1,0 +1,382 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #e0e0e0;
+    background-color: #0a0a0a;
+    scroll-behavior: smooth;
+}
+
+.wadah {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.navigasi {
+    background: rgba(10, 10, 10, 0.95);
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.wadah-navigasi {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: #00ff88;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.menu-navigasi {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.tautan-navigasi {
+    color: #e0e0e0;
+    text-decoration: none;
+    transition: color 0.3s;
+    font-weight: 500;
+}
+
+.tautan-navigasi:hover,
+.tautan-navigasi.aktif {
+    color: #00ff88;
+}
+
+.bagian-utama {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    padding: 0 20px;
+}
+
+.wadah-utama {
+    max-width: 800px;
+}
+
+.judul-utama {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.warna-cyber {
+    color: #00ff88;
+}
+
+.subjudul-utama {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #b0b0b0;
+}
+
+.deskripsi-utama {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: #888;
+}
+
+.kelompok-tombol {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tombol {
+    padding: 12px 30px;
+    border: 2px solid #00ff88;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    cursor: pointer;
+    font-size: 1rem;
+    background: none;
+    color: inherit;
+}
+
+.tombol-utama {
+    background: #00ff88;
+    color: #0a0a0a;
+}
+
+.tombol-sekunder {
+    background: transparent;
+    color: #00ff88;
+}
+
+.tombol:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+}
+
+.tombol-utama:hover {
+    background: #00e579;
+}
+
+.tombol-sekunder:hover {
+    background: #00ff88;
+    color: #0a0a0a;
+}
+
+section {
+    padding: 100px 0;
+}
+
+.judul-bagian {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #00ff88;
+}
+
+.bagian-tentang {
+    background: #111111;
+}
+
+.kelompok-teks {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.teks-tentang {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    color: #b0b0b0;
+}
+
+.teks-tentang strong {
+    color: #00ff88;
+}
+
+.bagian-skills {
+    background: #151515;
+}
+
+.kisi-kartu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.kartu-skill {
+    background: #1a1a1a;
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid #2a2a2a;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.kartu-skill:hover {
+    transform: translateY(-5px);
+    border-color: #00ff88;
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+}
+
+.ikon-skill {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.judul-skill {
+    color: #00ff88;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.deskripsi-skill {
+    color: #b0b0b0;
+    margin-bottom: 1.5rem;
+}
+
+.bilah-progress {
+    background: #2a2a2a;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress {
+    background: #00ff88;
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1.5s ease-in-out;
+}
+
+.bagian-kontak {
+    background: #111111;
+    text-align: center;
+}
+
+.deskripsi-kontak {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #b0b0b0;
+}
+
+.kelompok-kontak {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.tautan-kontak {
+    color: #00ff88;
+    text-decoration: none;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border: 2px solid #00ff88;
+    border-radius: 5px;
+    transition: all 0.3s;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+}
+
+.tautan-kontak:hover {
+    background: #00ff88;
+    color: #0a0a0a;
+    transform: translateY(-2px);
+}
+
+.footer {
+    background: #0a0a0a;
+    padding: 2rem 0;
+    text-align: center;
+    border-top: 1px solid #2a2a2a;
+}
+
+.teks-footer {
+    color: #666;
+}
+
+.tombol-atas {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: #00ff88;
+    color: #0a0a0a;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1000;
+}
+
+.tombol-atas.tampil {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tombol-atas:hover {
+    transform: scale(1.1);
+    background: #00e579;
+}
+
+@keyframes muncul {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animasi-muncul {
+    animation: muncul 0.8s ease-out;
+}
+
+.animasi-muncul-aktif {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: all 0.8s ease-out;
+}
+
+@media (max-width: 768px) {
+    .judul-utama {
+        font-size: 2.5rem;
+    }
+
+    .subjudul-utama {
+        font-size: 1.2rem;
+    }
+
+    .menu-navigasi {
+        gap: 1rem;
+    }
+
+    .kelompok-tombol {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tombol {
+        width: 200px;
+        text-align: center;
+    }
+
+    .kisi-kartu {
+        grid-template-columns: 1fr;
+    }
+
+    .wadah-navigasi {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .judul-bagian {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .judul-utama {
+        font-size: 2rem;
+    }
+
+    .wadah {
+        padding: 0 15px;
+    }
+
+    .kartu-skill {
+        padding: 1.5rem;
+    }
+}
