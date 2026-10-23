@@ -44,10 +44,9 @@ Bagian:
 2. Hero / introduction
 3. About
 4. Featured projects
-5. Focus / skills in progress
-6. Learning journey
-7. Contact
-8. Footer
+5. Learning journey
+6. Contact
+7. Footer
 
 Arah visual:
 - Dark developer editorial, charcoal/hitam dengan aksen hijau lembut.

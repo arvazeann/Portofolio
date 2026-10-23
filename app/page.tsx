@@ -12,30 +12,26 @@ const projects = [
   {
     number: "01",
     name: "RuangLagi",
-    category: "MVP · Marketplace kebutuhan kos",
+    category: "MVP · Marketplace barang preloved kebutuhan kos",
     description:
-      "Tempat bagi anak kos untuk mencari dan menawarkan barang kebutuhan kos preloved dengan harga bersahabat, seperti furnitur, alat dapur, elektronik, dan perlengkapan belajar.",
+      "RuangLagi ditujukan untuk memudahkan anak kos mencari dan menawarkan barang preloved kebutuhan kos dengan harga bersahabat, seperti furnitur, alat dapur, elektronik, dan perlengkapan belajar.",
     technologies: "Next.js · React · TypeScript · PostgreSQL · Prisma · Auth.js",
-    note:
-      "Fitur yang terdokumentasi mencakup katalog, pencarian/filter, favorit, dan pesanan. Uji browser menyeluruh masih tertunda.",
     href: "https://ruanglagi.vercel.app/",
     repositoryHref: "https://github.com/arvazeann/Hackaton",
     visual: "ruanglagi",
-    visualLabel: "Ilustrasi konsep, bukan screenshot produk",
+    visualLabel: "Tampilan aktual dari demo RuangLagi",
   },
   {
     number: "02",
     name: "Sistem Manajemen Penjualan dan Stok UMKM",
     category: "Proyek akademik · CLI · C",
     description:
-      "Proyek akademik berbasis terminal dengan konsep pengelolaan produk, transaksi, riwayat transaksi, laporan, dan stok.",
+      "Proyek akademik berbasis CLI dalam bahasa C. Konsepnya mencakup pengelolaan produk dan stok, transaksi, riwayat transaksi, serta laporan.",
     technologies: null,
-    note:
-      "Kode sumber belum tersedia di repository portofolio. Status implementasi fitur dan tautan repository spesifik perlu dikonfirmasi.",
     href: null,
     repositoryHref: null,
     visual: "terminal",
-    visualLabel: "Ilustrasi terminal, bukan tampilan aplikasi",
+    visualLabel: "Ilustrasi konsep terminal proyek C",
   },
 ];
 
@@ -50,24 +46,26 @@ function ArrowIcon() {
 function ProjectVisual({ type, label }: { type: string; label: string }) {
   if (type === "ruanglagi") {
     return (
-      <div className="project-visual project-visual--shop" role="img" aria-label={label}>
+      <div className="project-visual project-visual--shop">
         <div className="visual-caption">{label}</div>
-        <div className="shop-window">
-          <div className="shop-topline">
-            <span>ruanglagi</span>
-            <span className="shop-menu">MENU&nbsp;&nbsp; BAG</span>
-          </div>
-          <div className="shop-art">
-            <span className="shop-art-label">BARANG PRELOVED ANAK KOS</span>
-            <span className="shop-art-title">Cari barang<br />untuk kos.</span>
-            <span className="shop-art-orbit" aria-hidden="true" />
-            <span className="shop-art-chip">KEBUTUHAN KOS<br />01 / 02</span>
-          </div>
-          <div className="shop-bottomline">
-            <span>BARANG PRELOVED</span>
-            <span>UNTUK ANAK KOS</span>
-          </div>
-        </div>
+        <figure className="project-screenshot project-screenshot--home">
+          <Image
+            src="/projects/ruanglagi-homepage.png"
+            alt="Halaman utama RuangLagi dengan navigasi, pencarian kebutuhan kos, dan pilihan barang preloved."
+            fill
+            sizes="(max-width: 600px) 78vw, (max-width: 800px) 40vw, 420px"
+          />
+          <figcaption>Halaman utama</figcaption>
+        </figure>
+        <figure className="project-screenshot project-screenshot--catalog">
+          <Image
+            src="/projects/ruanglagi-catalog.png"
+            alt="Halaman katalog RuangLagi dengan pencarian, kategori, filter, dan kartu barang preloved."
+            fill
+            sizes="(max-width: 600px) 50vw, (max-width: 800px) 27vw, 280px"
+          />
+          <figcaption>Katalog</figcaption>
+        </figure>
       </div>
     );
   }
@@ -125,8 +123,8 @@ export default function Home() {
             <p className="eyebrow"><span className="status-dot" /> Mahasiswa Informatika · Sedang bertumbuh</p>
             <h1 id="hero-title">Belajar, membangun,<br /><span>lalu belajar lagi.</span></h1>
             <p className="hero-description">
-              Halo, saya <strong>Rafif Arvazean</strong>. Saya sedang belajar
-              Informatika dan membangun proyek sebagai bagian dari prosesnya.
+              Halo, saya <strong>Rafif Arvazean</strong>, mahasiswa Informatika yang
+              membangun proyek sambil mendokumentasikan proses belajar.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#proyek">
@@ -149,7 +147,7 @@ export default function Home() {
                 sizes="(max-width: 600px) 240px, 300px"
               />
             </div>
-            <p className="portrait-label">INFORMATICS STUDENT</p>
+            <p className="portrait-label">MAHASISWA INFORMATIKA</p>
           </div>
           <a className="scroll-cue" href="#tentang"><span /> GULIR UNTUK MENJELAJAH</a>
         </section>
@@ -160,9 +158,8 @@ export default function Home() {
             <h2 id="about-title">Sedang mencari tahu<br />apa yang bisa <em>dibangun.</em></h2>
             <div className="about-copy">
               <p>
-                Di sini saya mendokumentasikan proses belajar dan proyek yang saya
-                bangun. Catatan ini akan berkembang seiring perjalanan saya di bidang
-                Informatika.
+                Portofolio ini mencatat proyek yang saya bangun dan hal-hal yang saya
+                pelajari sebagai mahasiswa Informatika.
               </p>
               <p className="muted-copy">Pelan-pelan, satu proyek dan satu pelajaran pada satu waktu.</p>
             </div>
@@ -175,7 +172,7 @@ export default function Home() {
               <div className="section-label"><span>02</span> PILIHAN PROYEK</div>
               <h2 id="projects-title">Belajar lewat <em>praktik.</em></h2>
             </div>
-            <p>Dua proyek dalam perjalanan belajar saya.<br />Detailnya akan terus diperbarui.</p>
+            <p>Dua proyek yang tercatat dalam perjalanan belajar saya.</p>
           </div>
 
           <div className="project-list">
@@ -189,22 +186,20 @@ export default function Home() {
                   {project.technologies && (
                     <p className="project-tech"><span>Teknologi</span>{project.technologies}</p>
                   )}
-                  <p className="project-note">{project.note}</p>
-                  <div className="project-links">
-                    {project.href && (
-                      <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
-                        Buka demo <ArrowIcon />
-                      </a>
-                    )}
-                    {project.repositoryHref && (
-                      <a className="project-link" href={project.repositoryHref} target="_blank" rel="noreferrer">
-                        Repository <ArrowIcon />
-                      </a>
-                    )}
-                    {!project.href && !project.repositoryHref && (
-                      <span className="project-link project-link--pending">Repository belum tersedia</span>
-                    )}
-                  </div>
+                  {(project.href || project.repositoryHref) && (
+                    <div className="project-links">
+                      {project.href && (
+                        <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
+                          Buka demo <ArrowIcon />
+                        </a>
+                      )}
+                      {project.repositoryHref && (
+                        <a className="project-link" href={project.repositoryHref} target="_blank" rel="noreferrer">
+                          Repository <ArrowIcon />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
@@ -215,16 +210,15 @@ export default function Home() {
           <div className="section-label"><span>03</span> PERJALANAN BELAJAR</div>
           <div className="journey-content">
             <div>
-              <h2 id="journey-title">Prosesnya masih <em>berjalan.</em></h2>
+              <h2 id="journey-title">Yang Sedang <em>Dipelajari</em></h2>
               <p className="journey-intro">
-                Bagian ini akan merangkum hal yang sedang dipelajari dan proyek yang
-                dibangun. Untuk sekarang, perjalanan ini saya dokumentasikan dari
-                waktu ke waktu.
+                Saya belajar dengan mengerjakan proyek dan mendokumentasikan hal-hal
+                yang saya pahami sepanjang prosesnya.
               </p>
             </div>
             <div className="journey-note">
-              <p>Catatan belajar dan fokus berikutnya akan ditambahkan seiring perjalanan ini berkembang.</p>
-              <span className="journey-caption">CURRENTLY LEARNING · TO BE CONTINUED</span>
+              <p>Catatan ini mengikuti proses belajar dan proyek yang saya kerjakan.</p>
+              <span className="journey-caption">PROSES BELAJAR · PROYEK</span>
             </div>
           </div>
         </section>
