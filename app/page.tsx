@@ -4,8 +4,43 @@ import profilePhoto from "../Profil.jpeg";
 const navigation = [
   { href: "#tentang", label: "Tentang" },
   { href: "#proyek", label: "Proyek" },
+  { href: "#sertifikat", label: "Sertifikat" },
   { href: "#perjalanan", label: "Perjalanan" },
   { href: "#kontak", label: "Kontak" },
+];
+
+const certificates = [
+  {
+    title: "Belajar Dasar AI",
+    issuer: "Dicoding Indonesia",
+    issued: "17 Januari 2026",
+    expires: "17 Januari 2029",
+    level: null,
+    focus: null,
+    credentialId: "JMZVVR4RRZN9",
+    credentialUrl: "https://www.dicoding.com/certificates/JMZVVR4RRZN9",
+  },
+  {
+    title: "Belajar Dasar Cloud dan Gen AI di AWS",
+    issuer: "Dicoding Indonesia",
+    issued: "26 Januari 2026",
+    expires: "26 Januari 2029",
+    level: null,
+    focus: null,
+    credentialId: "53XEK67WKXRN",
+    credentialUrl: "https://www.dicoding.com/certificates/53XEK67WKXRN",
+  },
+  {
+    title: "Nalara Academy, Advanced AI & Deep Learning Program",
+    issuer: "Nalara Academy",
+    issued: "Agustus 2026",
+    expires: null,
+    level: "Advanced",
+    focus: "Implementasi Machine Learning Operations (MLOps)",
+    credentialId: "NLR-CERT-ADV-B01-0026",
+    credentialUrl:
+      "https://www.linkedin.com/in/rafif-arvazean/overlay/Certifications/935667001/treasury/?profileId=ACoAAF0KyogB-7EmVWY_0NmJme99XQ0PWNRqFms",
+  },
 ];
 
 const projects = [
@@ -206,8 +241,39 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="certificates-section section-shell section-divider" id="sertifikat" aria-labelledby="certificates-title">
+          <div className="certificates-heading">
+            <div className="section-label"><span>03</span> SERTIFIKAT</div>
+            <h2 id="certificates-title">Belajar dan <em>bertumbuh.</em></h2>
+            <p>Kredensial pembelajaran yang dapat diperiksa pada halaman penerbit.</p>
+          </div>
+          <div className="certificate-grid">
+            {certificates.map((certificate) => (
+              <article className="certificate-card" key={certificate.credentialId}>
+                <p className="certificate-issuer">{certificate.issuer}</p>
+                <h3>{certificate.title}</h3>
+                <dl className="certificate-dates">
+                  <div>
+                    <dt>Diterbitkan</dt>
+                    <dd>{certificate.issued}</dd>
+                  </div>
+                  <div>
+                    <dt>{certificate.expires ? "Berlaku sampai" : "Level"}</dt>
+                    <dd>{certificate.expires ?? certificate.level}</dd>
+                  </div>
+                </dl>
+                {certificate.focus && <p className="certificate-focus">{certificate.focus}</p>}
+                <p className="certificate-id"><span>ID kredensial</span> {certificate.credentialId}</p>
+                <a className="project-link certificate-link" href={certificate.credentialUrl} target="_blank" rel="noreferrer">
+                  Lihat kredensial <ArrowIcon />
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="journey-section section-shell section-divider" id="perjalanan" aria-labelledby="journey-title">
-          <div className="section-label"><span>03</span> PERJALANAN BELAJAR</div>
+          <div className="section-label"><span>04</span> PERJALANAN BELAJAR</div>
           <div className="journey-content">
             <div>
               <h2 id="journey-title">Yang Sedang <em>Dipelajari</em></h2>
@@ -225,7 +291,7 @@ export default function Home() {
 
         <section className="contact-section" id="kontak" aria-labelledby="contact-title">
           <div className="contact-inner section-shell">
-            <div className="section-label"><span>04</span> KONTAK</div>
+            <div className="section-label"><span>05</span> KONTAK</div>
             <div className="contact-content">
               <div>
                 <p className="eyebrow">PUNYA IDE ATAU INGIN BERKENALAN?</p>
