@@ -1,6 +1,8 @@
 import Image from "next/image";
 import profilePhoto from "../Profil.jpeg";
 import PixelatedPortraitReveal from "./components/PixelatedPortraitReveal";
+import ScrollRevealEffects from "./components/ScrollRevealEffects";
+import { certificates } from "./data/certificates";
 
 const navigation = [
   { href: "#tentang", label: "Tentang" },
@@ -10,39 +12,7 @@ const navigation = [
   { href: "#kontak", label: "Kontak" },
 ];
 
-const certificates = [
-  {
-    title: "Belajar Dasar AI",
-    issuer: "Dicoding Indonesia",
-    issued: "17 Januari 2026",
-    expires: "17 Januari 2029",
-    level: null,
-    focus: null,
-    credentialId: "JMZVVR4RRZN9",
-    credentialUrl: "https://www.dicoding.com/certificates/JMZVVR4RRZN9",
-  },
-  {
-    title: "Belajar Dasar Cloud dan Gen AI di AWS",
-    issuer: "Dicoding Indonesia",
-    issued: "26 Januari 2026",
-    expires: "26 Januari 2029",
-    level: null,
-    focus: null,
-    credentialId: "53XEK67WKXRN",
-    credentialUrl: "https://www.dicoding.com/certificates/53XEK67WKXRN",
-  },
-  {
-    title: "Nalara Academy, Advanced AI & Deep Learning Program",
-    issuer: "Nalara Academy",
-    issued: "Agustus 2026",
-    expires: null,
-    level: "Advanced",
-    focus: "Implementasi Machine Learning Operations (MLOps)",
-    credentialId: "NLR-CERT-ADV-B01-0026",
-    credentialUrl:
-      "https://www.linkedin.com/in/rafif-arvazean/overlay/Certifications/935667001/treasury/?profileId=ACoAAF0KyogB-7EmVWY_0NmJme99XQ0PWNRqFms",
-  },
-];
+const latestCertificateYear = Math.max(...certificates.map((certificate) => certificate.year));
 
 const projects = [
   {
@@ -195,10 +165,10 @@ export default function Home() {
         </section>
 
         <section className="about-section section-shell section-divider" id="tentang" aria-labelledby="about-title">
-          <div className="section-label"><span>01</span> TENTANG SAYA</div>
+          <div className="section-label" data-reveal><span>01</span> TENTANG SAYA</div>
           <div className="about-content">
-            <h2 id="about-title">Sedang mencari tahu<br />apa yang bisa <em>dibangun.</em></h2>
-            <div className="about-copy">
+            <h2 id="about-title" data-reveal data-reveal-delay="90">Sedang mencari tahu<br />apa yang bisa <em>dibangun.</em></h2>
+            <div className="about-copy" data-reveal data-reveal-delay="180">
               <p>
                 Portofolio ini mencatat proyek yang saya bangun dan hal-hal yang saya
                 pelajari sebagai mahasiswa Informatika.
@@ -211,15 +181,15 @@ export default function Home() {
         <section className="projects-section section-shell section-divider" id="proyek" aria-labelledby="projects-title">
           <div className="section-heading">
             <div>
-              <div className="section-label"><span>02</span> PILIHAN PROYEK</div>
-              <h2 id="projects-title">Belajar lewat <em>praktik.</em></h2>
+              <div className="section-label" data-reveal><span>02</span> PILIHAN PROYEK</div>
+              <h2 id="projects-title" data-reveal data-reveal-delay="90">Belajar lewat <em>praktik.</em></h2>
             </div>
-            <p>Dua proyek yang tercatat dalam perjalanan belajar saya.</p>
+            <p data-reveal data-reveal-delay="180">Dua proyek yang tercatat dalam perjalanan belajar saya.</p>
           </div>
 
           <div className="project-list">
-            {projects.map((project) => (
-              <article className="project-card" key={project.number}>
+            {projects.map((project, index) => (
+              <article className="project-card" key={project.number} data-reveal data-reveal-delay={String(index * 100)}>
                 <ProjectVisual type={project.visual} label={project.visualLabel} />
                 <div className="project-details">
                   <div className="project-meta"><span>{project.number}</span><span>{project.category}</span></div>
@@ -250,46 +220,51 @@ export default function Home() {
 
         <section className="certificates-section section-shell section-divider" id="sertifikat" aria-labelledby="certificates-title">
           <div className="certificates-heading">
-            <div className="section-label"><span>03</span> SERTIFIKAT</div>
-            <h2 id="certificates-title">Belajar dan <em>bertumbuh.</em></h2>
-            <p>Kredensial pembelajaran yang dapat diperiksa pada halaman penerbit.</p>
+            <div className="section-label" data-reveal><span>03</span> SERTIFIKAT</div>
+            <h2 id="certificates-title" data-reveal data-reveal-delay="90">Belajar dan <em>bertumbuh.</em></h2>
+            <p data-reveal data-reveal-delay="180">Sertifikat dan program pembelajaran yang tercatat di profil LinkedIn.</p>
+          </div>
+          <div className="certificate-stats" aria-label="Ringkasan sertifikat" data-reveal data-reveal-delay="240">
+            <div><strong aria-hidden="true" data-count-up={certificates.length}>{String(certificates.length).padStart(2, "0")}</strong><span>Sertifikat tercatat</span></div>
+            <div><strong aria-hidden="true" data-count-up={latestCertificateYear}>{latestCertificateYear}</strong><span>Tahun terbaru</span></div>
           </div>
           <div className="certificate-grid">
-            {certificates.map((certificate) => (
-              <article className="certificate-card" key={certificate.credentialId}>
+            {certificates.map((certificate, index) => (
+              <article className="certificate-card" key={certificate.id} data-reveal data-reveal-delay={String(300 + index * 100)}>
                 <p className="certificate-issuer">{certificate.issuer}</p>
                 <h3>{certificate.title}</h3>
-                <dl className="certificate-dates">
-                  <div>
-                    <dt>Diterbitkan</dt>
-                    <dd>{certificate.issued}</dd>
-                  </div>
-                  <div>
-                    <dt>{certificate.expires ? "Berlaku sampai" : "Level"}</dt>
-                    <dd>{certificate.expires ?? certificate.level}</dd>
-                  </div>
-                </dl>
-                {certificate.focus && <p className="certificate-focus">{certificate.focus}</p>}
-                <p className="certificate-id"><span>ID kredensial</span> {certificate.credentialId}</p>
-                <a className="project-link certificate-link" href={certificate.credentialUrl} target="_blank" rel="noreferrer">
-                  Lihat kredensial <ArrowIcon />
-                </a>
+                <p className="certificate-year">Diterbitkan {certificate.issued}</p>
+                {certificate.expires && <p className="certificate-expiry">Berlaku sampai {certificate.expires}</p>}
+                <p className="certificate-description">{certificate.description}</p>
+                <ul className="certificate-skills" aria-label="Topik sertifikat">
+                  {certificate.skills.map((skill) => <li key={skill}>{skill}</li>)}
+                </ul>
+                <p className="certificate-id">ID kredensial <code>{certificate.credentialId}</code></p>
+                {certificate.credentialUrl ? (
+                  <a className="project-link certificate-link" href={certificate.credentialUrl} target="_blank" rel="noopener noreferrer">
+                    Lihat kredensial <ArrowIcon />
+                  </a>
+                ) : (
+                  <a className="project-link certificate-link" href="https://www.linkedin.com/in/rafif-arvazean/" target="_blank" rel="noopener noreferrer">
+                    Lihat profil LinkedIn <ArrowIcon />
+                  </a>
+                )}
               </article>
             ))}
           </div>
         </section>
 
         <section className="journey-section section-shell section-divider" id="perjalanan" aria-labelledby="journey-title">
-          <div className="section-label"><span>04</span> PERJALANAN BELAJAR</div>
+          <div className="section-label" data-reveal><span>04</span> PERJALANAN BELAJAR</div>
           <div className="journey-content">
-            <div>
+            <div data-reveal data-reveal-delay="90">
               <h2 id="journey-title">Yang Sedang <em>Dipelajari</em></h2>
               <p className="journey-intro">
                 Saya belajar dengan mengerjakan proyek dan mendokumentasikan hal-hal
                 yang saya pahami sepanjang prosesnya.
               </p>
             </div>
-            <div className="journey-note">
+            <div className="journey-note" data-reveal data-reveal-delay="180">
               <p>Catatan ini mengikuti proses belajar dan proyek yang saya kerjakan.</p>
               <span className="journey-caption">PROSES BELAJAR · PROYEK</span>
             </div>
@@ -298,8 +273,8 @@ export default function Home() {
 
         <section className="contact-section" id="kontak" aria-labelledby="contact-title">
           <div className="contact-inner section-shell">
-            <div className="section-label"><span>05</span> KONTAK</div>
-            <div className="contact-content">
+            <div className="section-label" data-reveal><span>05</span> KONTAK</div>
+            <div className="contact-content" data-reveal data-reveal-delay="100">
               <div>
                 <p className="eyebrow">PUNYA IDE ATAU INGIN BERKENALAN?</p>
                 <h2 id="contact-title">Mari mulai<br /><em>percakapan.</em></h2>
@@ -308,7 +283,7 @@ export default function Home() {
                 rafifarvazean@gmail.com <ArrowIcon />
               </a>
             </div>
-            <nav className="social-links" aria-label="Profil dan kontak lain">
+            <nav className="social-links" aria-label="Profil dan kontak lain" data-reveal data-reveal-delay="200">
               <a href="https://github.com/arvazeann" target="_blank" rel="noreferrer">GitHub <ArrowIcon /></a>
               <a href="https://www.linkedin.com/in/rafif-arvazean/" target="_blank" rel="noreferrer">LinkedIn <ArrowIcon /></a>
               <a href="mailto:rafifarvazean@gmail.com">Email <ArrowIcon /></a>
@@ -324,6 +299,7 @@ export default function Home() {
           <a className="back-to-top" href="#beranda">Kembali ke atas</a>
         </div>
       </footer>
+      <ScrollRevealEffects />
     </>
   );
 }
