@@ -1,44 +1,17 @@
 import Image from "next/image";
 import profilePhoto from "../Profil.jpeg";
+import JourneyTimeline from "./components/JourneyTimeline";
 import PixelatedPortraitReveal from "./components/PixelatedPortraitReveal";
+import { Preloader, ScrollProgress, SiteHeader, TypingLabel } from "./components/PortfolioChrome";
 import ScrollRevealEffects from "./components/ScrollRevealEffects";
-import { certificates } from "./data/certificates";
+import { getRuangLagiRepository } from "./data/github";
+import { certificates, focusAreas, makeJourneyItems, projects as projectData } from "./data/portfolio";
 
 const navigation = [
   { href: "#tentang", label: "Tentang" },
   { href: "#proyek", label: "Proyek" },
-  { href: "#sertifikat", label: "Sertifikat" },
   { href: "#perjalanan", label: "Perjalanan" },
   { href: "#kontak", label: "Kontak" },
-];
-
-const latestCertificateYear = Math.max(...certificates.map((certificate) => certificate.year));
-
-const projects = [
-  {
-    number: "01",
-    name: "RuangLagi",
-    category: "MVP · Marketplace barang preloved kebutuhan kos",
-    description:
-      "RuangLagi ditujukan untuk memudahkan anak kos mencari dan menawarkan barang preloved kebutuhan kos dengan harga bersahabat, seperti furnitur, alat dapur, elektronik, dan perlengkapan belajar.",
-    technologies: "Next.js · React · TypeScript · PostgreSQL · Prisma · Auth.js",
-    href: "https://ruanglagi.vercel.app/",
-    repositoryHref: "https://github.com/arvazeann/Hackaton",
-    visual: "ruanglagi",
-    visualLabel: "Tampilan aktual dari demo RuangLagi",
-  },
-  {
-    number: "02",
-    name: "Sistem Manajemen Penjualan dan Stok UMKM",
-    category: "Proyek akademik · CLI · C",
-    description:
-      "Proyek akademik berbasis CLI dalam bahasa C. Konsepnya mencakup pengelolaan produk dan stok, transaksi, riwayat transaksi, serta laporan.",
-    technologies: null,
-    href: null,
-    repositoryHref: null,
-    visual: "terminal",
-    visualLabel: "Ilustrasi konsep terminal proyek C",
-  },
 ];
 
 function ArrowIcon() {
@@ -99,32 +72,34 @@ function ProjectVisual({ type, label }: { type: string; label: string }) {
   );
 }
 
-export default function Home() {
+function Marquee({ text }: { text: string }) {
+  return (
+    <div className="marquee" aria-label={text}>
+      <div className="marquee-track" aria-hidden="true">
+        {[0, 1, 2, 3].map((copy) => <span key={copy}>{text}<i> · </i></span>)}
+      </div>
+    </div>
+  );
+}
+
+export default async function Home() {
+  const ruangLagiRepository = await getRuangLagiRepository();
+  const projects = projectData.map((project) => project.id === "ruanglagi" && ruangLagiRepository
+    ? { ...project, repositoryHref: ruangLagiRepository.url, start: ruangLagiRepository.createdAt }
+    : project);
+  const journeyItems = makeJourneyItems(ruangLagiRepository?.createdAt);
   return (
     <>
       <a className="skip-link" href="#konten">Lewati ke konten</a>
-
-      <header className="site-header">
-        <div className="header-inner">
-          <a className="wordmark" href="#beranda" aria-label="Rafif Arvazean, beranda">
-            <span className="wordmark-mark">r.</span>
-            <span>rafif arvazean</span>
-          </a>
-          <nav aria-label="Navigasi utama">
-            <ul className="nav-list">
-              {navigation.map((item) => (
-                <li key={item.href}><a href={item.href}>{item.label}</a></li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <ScrollProgress />
+      <SiteHeader navigation={navigation} />
+      <Preloader />
 
       <main id="konten">
         <section className="hero-scroll is-scroll-enhanced" id="beranda" aria-labelledby="hero-title">
           <div className="hero hero-panel">
-            <p className="hero-display-name" aria-hidden="true">ARVAZEAN</p>
-            <div className="portrait-wrap">
+            <p className="hero-display-name hero-entry hero-entry--title" aria-hidden="true">ARVAZEAN</p>
+            <div className="portrait-wrap hero-entry hero-entry--portrait">
               <div className="portrait-frame">
                 <Image
                   className="portrait-photo"
@@ -146,14 +121,14 @@ export default function Home() {
               </div>
             </div>
             <PixelatedPortraitReveal />
-            <div className="hero-copy">
-              <p className="eyebrow"><span className="status-dot" /> Mahasiswa Informatika · Sedang bertumbuh</p>
+            <div className="hero-copy hero-entry hero-entry--copy">
+              <p className="eyebrow"><TypingLabel /></p>
               <h1 id="hero-title">
                 <span>Belajar, membangun,</span>
                 <span className="hero-title-accent">lalu belajar lagi.</span>
               </h1>
             </div>
-            <div className="hero-actions">
+            <div className="hero-actions hero-entry hero-entry--actions">
               <a className="button button-primary" href="#proyek">
                 Lihat proyek
               </a>
@@ -164,10 +139,12 @@ export default function Home() {
           </div>
         </section>
 
+        <Marquee text="Belajar · Membangun · Belajar lagi" />
+
         <section className="about-section section-shell section-divider" id="tentang" aria-labelledby="about-title">
           <div className="section-label" data-reveal><span>01</span> TENTANG SAYA</div>
           <div className="about-content">
-            <h2 id="about-title" data-reveal data-reveal-delay="90">Sedang mencari tahu<br />apa yang bisa <em>dibangun.</em></h2>
+            <h2 id="about-title" data-reveal data-reveal-delay="90"><span className="title-line"><span>Sedang mencari tahu</span></span><span className="title-line"><span>apa yang bisa <em>dibangun.</em></span></span></h2>
             <div className="about-copy" data-reveal data-reveal-delay="180">
               <p>
                 Portofolio ini mencatat proyek yang saya bangun dan hal-hal yang saya
@@ -176,13 +153,24 @@ export default function Home() {
               <p className="muted-copy">Pelan-pelan, satu proyek dan satu pelajaran pada satu waktu.</p>
             </div>
           </div>
+          <div className="about-extras" data-reveal data-reveal-delay="240">
+            <div className="focus-area-list" aria-label="Bidang yang tercatat dalam proyek dan pembelajaran">
+              {focusAreas.map((area) => <span key={area}>{area}</span>)}
+            </div>
+            <div className="about-stats" aria-label="Ringkasan portofolio">
+              <div><strong aria-hidden="true" data-count-up={projects.length}>{String(projects.length).padStart(2, "0")}</strong><span>Proyek tercatat</span></div>
+              <div><strong aria-hidden="true" data-count-up={certificates.length}>{String(certificates.length).padStart(2, "0")}</strong><span>Sertifikat tercatat</span></div>
+            </div>
+          </div>
         </section>
+
+        <Marquee text="Web · AI / ML · Cloud · C" />
 
         <section className="projects-section section-shell section-divider" id="proyek" aria-labelledby="projects-title">
           <div className="section-heading">
             <div>
               <div className="section-label" data-reveal><span>02</span> PILIHAN PROYEK</div>
-              <h2 id="projects-title" data-reveal data-reveal-delay="90">Belajar lewat <em>praktik.</em></h2>
+              <h2 id="projects-title" data-reveal data-reveal-delay="90"><span className="title-line"><span>Belajar lewat <em>praktik.</em></span></span></h2>
             </div>
             <p data-reveal data-reveal-delay="180">Dua proyek yang tercatat dalam perjalanan belajar saya.</p>
           </div>
@@ -218,47 +206,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="certificates-section section-shell section-divider" id="sertifikat" aria-labelledby="certificates-title">
-          <div className="certificates-heading">
-            <div className="section-label" data-reveal><span>03</span> SERTIFIKAT</div>
-            <h2 id="certificates-title" data-reveal data-reveal-delay="90">Belajar dan <em>bertumbuh.</em></h2>
-            <p data-reveal data-reveal-delay="180">Sertifikat dan program pembelajaran yang tercatat di profil LinkedIn.</p>
-          </div>
-          <div className="certificate-stats" aria-label="Ringkasan sertifikat" data-reveal data-reveal-delay="240">
-            <div><strong aria-hidden="true" data-count-up={certificates.length}>{String(certificates.length).padStart(2, "0")}</strong><span>Sertifikat tercatat</span></div>
-            <div><strong aria-hidden="true" data-count-up={latestCertificateYear}>{latestCertificateYear}</strong><span>Tahun terbaru</span></div>
-          </div>
-          <div className="certificate-grid">
-            {certificates.map((certificate, index) => (
-              <article className="certificate-card" key={certificate.id} data-reveal data-reveal-delay={String(300 + index * 100)}>
-                <p className="certificate-issuer">{certificate.issuer}</p>
-                <h3>{certificate.title}</h3>
-                <p className="certificate-year">Diterbitkan {certificate.issued}</p>
-                {certificate.expires && <p className="certificate-expiry">Berlaku sampai {certificate.expires}</p>}
-                <p className="certificate-description">{certificate.description}</p>
-                <ul className="certificate-skills" aria-label="Topik sertifikat">
-                  {certificate.skills.map((skill) => <li key={skill}>{skill}</li>)}
-                </ul>
-                <p className="certificate-id">ID kredensial <code>{certificate.credentialId}</code></p>
-                {certificate.credentialUrl ? (
-                  <a className="project-link certificate-link" href={certificate.credentialUrl} target="_blank" rel="noopener noreferrer">
-                    Lihat kredensial <ArrowIcon />
-                  </a>
-                ) : (
-                  <a className="project-link certificate-link" href="https://www.linkedin.com/in/rafif-arvazean/" target="_blank" rel="noopener noreferrer">
-                    Lihat profil LinkedIn <ArrowIcon />
-                  </a>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
+        <Marquee text="Proses · Praktik · Perkembangan" />
 
         <section className="journey-section section-shell section-divider" id="perjalanan" aria-labelledby="journey-title">
-          <div className="section-label" data-reveal><span>04</span> PERJALANAN BELAJAR</div>
+          <div className="section-label" data-reveal><span>03</span> PERJALANAN BELAJAR</div>
           <div className="journey-content">
             <div data-reveal data-reveal-delay="90">
-              <h2 id="journey-title">Yang Sedang <em>Dipelajari</em></h2>
+              <h2 id="journey-title"><span className="title-line"><span>Yang Sedang <em>Dipelajari</em></span></span></h2>
               <p className="journey-intro">
                 Saya belajar dengan mengerjakan proyek dan mendokumentasikan hal-hal
                 yang saya pahami sepanjang prosesnya.
@@ -269,15 +223,16 @@ export default function Home() {
               <span className="journey-caption">PROSES BELAJAR · PROYEK</span>
             </div>
           </div>
+          <JourneyTimeline items={journeyItems} />
         </section>
 
         <section className="contact-section" id="kontak" aria-labelledby="contact-title">
           <div className="contact-inner section-shell">
-            <div className="section-label" data-reveal><span>05</span> KONTAK</div>
+            <div className="section-label" data-reveal><span>04</span> KONTAK</div>
             <div className="contact-content" data-reveal data-reveal-delay="100">
               <div>
                 <p className="eyebrow">PUNYA IDE ATAU INGIN BERKENALAN?</p>
-                <h2 id="contact-title">Mari mulai<br /><em>percakapan.</em></h2>
+                <h2 id="contact-title"><span className="title-line"><span>Mari mulai</span></span><span className="title-line"><span><em>percakapan.</em></span></span></h2>
               </div>
               <a className="contact-email" href="mailto:rafifarvazean@gmail.com">
                 rafifarvazean@gmail.com <ArrowIcon />

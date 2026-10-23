@@ -77,6 +77,7 @@ export default function PixelatedPortraitReveal() {
     let pixelRatio = 1;
     let panelWidth = 0;
     let panelHeight = 0;
+    let particleColor = "#e5ebe0";
     let photoLeft = 0;
     let photoTop = 0;
     let photoWidth = 0;
@@ -99,6 +100,10 @@ export default function PixelatedPortraitReveal() {
     const bucketLevels = [0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.78, 0.84, 0.9, 0.96];
     const bucketHeads = new Uint32Array(bucketLevels.length);
     const minFrameInterval = 1000 / 36;
+    const updateParticleColor = () => {
+      particleColor = getComputedStyle(document.documentElement).getPropertyValue("--particle-color").trim() || "#e5ebe0";
+    };
+    updateParticleColor();
 
     const getScrollProgress = () => {
       const range = wrapper.offsetHeight - window.innerHeight;
@@ -305,7 +310,9 @@ export default function PixelatedPortraitReveal() {
         const bubblePush = bubbleInfluence * 18;
         x += (bubbleX / bubbleDistance) * bubblePush;
         y += (bubbleY / bubbleDistance) * bubblePush;
-        const alpha = particleAlpha[index] * (1 - q * 0.58);
+        // Scatter and fade each sampled source particle together so the portrait
+        // fully dissolves instead of leaving a faint grid at the end of the scroll.
+        const alpha = particleAlpha[index] * (1 - q);
         if (alpha < PARTICLE_FADE_CONFIG.discardAlphaBelow) {
           bucketNext[index] = 0xffffffff;
           continue;
@@ -327,7 +334,7 @@ export default function PixelatedPortraitReveal() {
           const size = frameSize[index];
           context.rect(frameX[index] - size / 2, frameY[index] - size / 2, size, size);
         }
-        context.fillStyle = "#e5ebe0";
+        context.fillStyle = particleColor;
         context.globalAlpha = (bucket + 0.5) / bucketLevels.length;
         context.fill();
       }
@@ -458,6 +465,11 @@ export default function PixelatedPortraitReveal() {
     };
 
     const resizeObserver = new ResizeObserver(onResize);
+    const themeObserver = new MutationObserver(() => {
+      updateParticleColor();
+      if (count) render(smoothedProgress);
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     resizeObserver.observe(panel);
     resizeObserver.observe(image);
     window.addEventListener("resize", onResize, { passive: true });
@@ -474,6 +486,7 @@ export default function PixelatedPortraitReveal() {
       stop();
       observer.disconnect();
       resizeObserver.disconnect();
+      themeObserver.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       panel.removeEventListener("pointermove", onPointerMove);

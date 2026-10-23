@@ -46,9 +46,13 @@ npm run start
 
 ```text
 app/
+  components/       Navbar, preloader, animasi partikel, reveal, dan timeline
+  data/             Data proyek, sertifikat, dan perjalanan belajar
   globals.css       Tema, tipografi, layout responsif, dan reduced motion
   layout.tsx        Root layout, bahasa dokumen, dan metadata
-  page.tsx          Halaman utama, navigasi, konten, dan data proyek
+  page.tsx          Struktur halaman utama dan section
+  icon.svg          Ikon situs
+  opengraph-image.tsx Gambar Open Graph yang dibuat dari identitas portofolio
 Profil.jpeg         Foto profil asli
 ```
 
@@ -57,9 +61,9 @@ Konfigurasi penting lainnya berada di `package.json`, `tsconfig.json`, `eslint.c
 ## Memperbarui konten
 
 - **Profil, teks section, kontak, dan tautan:** edit markup di `app/page.tsx`. Periksa kembali alamat publik sebelum mengubah GitHub, LinkedIn, atau email.
-- **Deskripsi, teknologi, status, dan tautan proyek:** edit array `projects` di bagian atas `app/page.tsx`. Bedakan implementasi terverifikasi dari konsep atau hal yang menunggu konfirmasi.
+- **Deskripsi, teknologi, status, dan tautan proyek serta sertifikat/perjalanan:** perbarui data terpusat di `app/data/portfolio.ts`. Bedakan implementasi terverifikasi dari konsep atau hal yang menunggu konfirmasi.
 - **Foto profil:** ganti `Profil.jpeg` dengan foto asli yang boleh dipublikasikan. Pertahankan nama file tersebut atau sesuaikan import `profilePhoto` pada `app/page.tsx`. Kartu RuangLagi memakai screenshot halaman utama dan katalog demo di `public/projects/`; visual terminal proyek C tetap berupa ilustrasi konsep.
-- **Title, description, Open Graph, dan bahasa dokumen:** edit metadata dan `<html lang>` pada `app/layout.tsx`. Jangan menambahkan canonical sebelum domain portofolio diketahui; tambahkan favicon atau gambar sosial hanya jika aset yang sesuai tersedia.
+- **Title, description, Open Graph, dan bahasa dokumen:** edit metadata dan `<html lang>` pada `app/layout.tsx`; aset Open Graph dirender dari `app/opengraph-image.tsx` dan ikon dari `app/icon.svg`.
 - **Warna, ukuran teks, jarak, dan breakpoint:** edit design tokens dan aturan responsif pada `app/globals.css`.
 
 ## Konfirmasi sebelum publikasi
