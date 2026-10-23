@@ -159,7 +159,16 @@ export default function Home() {
                 <Image
                   className="portrait-photo"
                   src={profilePhoto}
-                  alt="Foto profil Rafif Arvazean"
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  priority
+                  sizes="(max-width: 600px) 94vw, (max-width: 800px) 76vw, 52vw"
+                />
+                <Image
+                  className="portrait-static-fallback"
+                  src="/profile-pixelated-fallback.png"
+                  alt="Potret Rafif Arvazean dalam tampilan monokrom berpiksel."
                   fill
                   priority
                   sizes="(max-width: 600px) 94vw, (max-width: 800px) 76vw, 52vw"
@@ -182,7 +191,6 @@ export default function Home() {
                 Hubungi saya <span className="button-icon" aria-hidden="true"><ArrowIcon /></span>
               </a>
             </div>
-            <a className="scroll-cue" href="#tentang" aria-label="Lanjut ke bagian Tentang"><span aria-hidden="true" /></a>
           </div>
         </section>
 
