@@ -1,5 +1,6 @@
 import Image from "next/image";
 import profilePhoto from "../Profil.jpeg";
+import PixelatedPortraitReveal from "./components/PixelatedPortraitReveal";
 
 const navigation = [
   { href: "#tentang", label: "Tentang" },
@@ -153,14 +154,35 @@ export default function Home() {
       </header>
 
       <main id="konten">
-        <section className="hero section-shell" id="beranda" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow"><span className="status-dot" /> Mahasiswa Informatika · Sedang bertumbuh</p>
-            <h1 id="hero-title">Belajar, membangun,<br /><span>lalu belajar lagi.</span></h1>
-            <p className="hero-description">
-              Halo, saya <strong>Rafif Arvazean</strong>, mahasiswa Informatika yang
-              membangun proyek sambil mendokumentasikan proses belajar.
-            </p>
+        <section className="hero-scroll" id="beranda" aria-labelledby="hero-title">
+          <div className="hero hero-panel">
+            <p className="hero-display-name" aria-hidden="true">Rafif Arvazean</p>
+            <div className="portrait-wrap">
+              <div className="portrait-frame">
+                <Image
+                  className="portrait-photo"
+                  src={profilePhoto}
+                  alt="Foto profil Rafif Arvazean"
+                  fill
+                  priority
+                  sizes="(max-width: 600px) 94vw, (max-width: 800px) 76vw, 52vw"
+                />
+              </div>
+              <p className="portrait-label">MAHASISWA INFORMATIKA</p>
+            </div>
+            <PixelatedPortraitReveal />
+            <div className="hero-copy">
+              <p className="eyebrow"><span className="status-dot" /> Mahasiswa Informatika · Sedang bertumbuh</p>
+              <h1 id="hero-title">
+                <span>Belajar, membangun,</span>
+                <span className="hero-title-accent">lalu belajar lagi.</span>
+              </h1>
+              <p className="hero-description">
+                Halo, saya <strong>Rafif Arvazean</strong>, mahasiswa Informatika yang
+                membangun proyek sambil mendokumentasikan proses belajar.
+              </p>
+              <div className="hero-footnote"><span>01 / 03</span><span>PORTOFOLIO &amp; CATATAN BELAJAR</span></div>
+            </div>
             <div className="hero-actions">
               <a className="button button-primary" href="#proyek">
                 Lihat proyek
@@ -169,22 +191,8 @@ export default function Home() {
                 Hubungi saya <span className="button-icon" aria-hidden="true"><ArrowIcon /></span>
               </a>
             </div>
-            <div className="hero-footnote"><span>01 / 03</span><span>PORTOFOLIO &amp; CATATAN BELAJAR</span></div>
+            <a className="scroll-cue" href="#tentang"><span /> GULIR UNTUK MENJELAJAH</a>
           </div>
-          <div className="portrait-wrap">
-            <div className="portrait-frame">
-              <Image
-                className="portrait-photo"
-                src={profilePhoto}
-                alt="Foto profil Rafif Arvazean"
-                fill
-                priority
-                sizes="(max-width: 600px) 240px, 300px"
-              />
-            </div>
-            <p className="portrait-label">MAHASISWA INFORMATIKA</p>
-          </div>
-          <a className="scroll-cue" href="#tentang"><span /> GULIR UNTUK MENJELAJAH</a>
         </section>
 
         <section className="about-section section-shell section-divider" id="tentang" aria-labelledby="about-title">
