@@ -147,16 +147,13 @@ export default function Home() {
               ))}
             </ul>
           </nav>
-          <a className="header-contact" href="mailto:rafifarvazean@gmail.com">
-            Mari terhubung <ArrowIcon />
-          </a>
         </div>
       </header>
 
       <main id="konten">
-        <section className="hero-scroll" id="beranda" aria-labelledby="hero-title">
+        <section className="hero-scroll is-scroll-enhanced" id="beranda" aria-labelledby="hero-title">
           <div className="hero hero-panel">
-            <p className="hero-display-name" aria-hidden="true">Rafif Arvazean</p>
+            <p className="hero-display-name" aria-hidden="true">ARVAZEAN</p>
             <div className="portrait-wrap">
               <div className="portrait-frame">
                 <Image
@@ -168,7 +165,6 @@ export default function Home() {
                   sizes="(max-width: 600px) 94vw, (max-width: 800px) 76vw, 52vw"
                 />
               </div>
-              <p className="portrait-label">MAHASISWA INFORMATIKA</p>
             </div>
             <PixelatedPortraitReveal />
             <div className="hero-copy">
@@ -177,11 +173,6 @@ export default function Home() {
                 <span>Belajar, membangun,</span>
                 <span className="hero-title-accent">lalu belajar lagi.</span>
               </h1>
-              <p className="hero-description">
-                Halo, saya <strong>Rafif Arvazean</strong>, mahasiswa Informatika yang
-                membangun proyek sambil mendokumentasikan proses belajar.
-              </p>
-              <div className="hero-footnote"><span>01 / 03</span><span>PORTOFOLIO &amp; CATATAN BELAJAR</span></div>
             </div>
             <div className="hero-actions">
               <a className="button button-primary" href="#proyek">
@@ -191,7 +182,7 @@ export default function Home() {
                 Hubungi saya <span className="button-icon" aria-hidden="true"><ArrowIcon /></span>
               </a>
             </div>
-            <a className="scroll-cue" href="#tentang"><span /> GULIR UNTUK MENJELAJAH</a>
+            <a className="scroll-cue" href="#tentang" aria-label="Lanjut ke bagian Tentang"><span aria-hidden="true" /></a>
           </div>
         </section>
 
