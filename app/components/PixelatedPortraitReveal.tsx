@@ -16,6 +16,33 @@ function ease(value: number) {
   return t * t * (3 - 2 * t);
 }
 
+const PARTICLE_FADE_CONFIG = {
+  opacity: 0.81,
+  bottomStart: 0.6,
+  bottomEnd: 0.86,
+  bottomOffsetPx: 70,
+  sideStartY: 0.48,
+  sideFullY: 0.76,
+  sideWidth: 0.22,
+  edgeOpacityFloor: 0.55,
+  edgeSizeFloor: 0.72,
+  discardFadeBelow: 0.03,
+  discardAlphaBelow: 0.03,
+} as const;
+
+function getParticleFade(u: number, v: number, portraitHeight: number) {
+  const bottomPosition = v - PARTICLE_FADE_CONFIG.bottomOffsetPx / portraitHeight;
+  const bottomFade = 1 - ease((bottomPosition - PARTICLE_FADE_CONFIG.bottomStart)
+    / (PARTICLE_FADE_CONFIG.bottomEnd - PARTICLE_FADE_CONFIG.bottomStart));
+  const sideStrength = ease((v - PARTICLE_FADE_CONFIG.sideStartY)
+    / (PARTICLE_FADE_CONFIG.sideFullY - PARTICLE_FADE_CONFIG.sideStartY));
+  const distanceFromSide = Math.min(u, 1 - u);
+  const edgeFade = 1 - ease(distanceFromSide / PARTICLE_FADE_CONFIG.sideWidth);
+  const sideFade = 1 - sideStrength * edgeFade;
+
+  return bottomFade * sideFade;
+}
+
 export default function PixelatedPortraitReveal() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -61,7 +88,7 @@ export default function PixelatedPortraitReveal() {
     let homeY = new Float32Array();
     let targetX = new Float32Array();
     let targetY = new Float32Array();
-    let luminance = new Float32Array();
+    let particleAlpha = new Float32Array();
     let particleSize = new Float32Array();
     let delay = new Float32Array();
     let duration = new Float32Array();
@@ -174,12 +201,47 @@ export default function PixelatedPortraitReveal() {
       }
 
       const chosen: number[] = [];
+      const chosenFade: number[] = [];
+      const chosenAlpha: number[] = [];
+      const chosenEdgeScale: number[] = [];
       const tonalValue = new Float32Array(raw.length);
       for (let index = 0; index < raw.length; index += 1) {
         const tone = clamp(grayLevels[index] + (grayLevels[index] - local[index]) * 0.45);
         tonalValue[index] = tone;
-        // The source has a black background; retain every non-background grid cell in place.
-        if (raw[index] > 4) chosen.push(index);
+        const sourceX = (index % columns + 0.5) / columns;
+        const sourceY = (Math.floor(index / columns) + 0.5) / rows;
+        const fade = getParticleFade(sourceX, sourceY, photoHeight);
+        const boundarySupport = clamp((local[index] + 0.035) / (grayLevels[index] + 0.035));
+        const edgeOpacity = PARTICLE_FADE_CONFIG.edgeOpacityFloor
+          + (1 - PARTICLE_FADE_CONFIG.edgeOpacityFloor) * boundarySupport;
+        const edgeSize = PARTICLE_FADE_CONFIG.edgeSizeFloor
+          + (1 - PARTICLE_FADE_CONFIG.edgeSizeFloor) * boundarySupport;
+        // Bake the edge mask into each particle's luminance-derived alpha before rendering.
+        const alpha = tone * fade * PARTICLE_FADE_CONFIG.opacity * edgeOpacity;
+        if (raw[index] > 4 && fade >= PARTICLE_FADE_CONFIG.discardFadeBelow
+          && alpha >= PARTICLE_FADE_CONFIG.discardAlphaBelow) {
+          chosen.push(index);
+          chosenFade.push(fade);
+          chosenAlpha.push(alpha);
+          chosenEdgeScale.push(edgeSize);
+        }
+      }
+
+      if (debugMode) {
+        const probes = [
+          { area: "face center", u: 0.5, v: 0.4 },
+          { area: "left head edge", u: 0.01, v: 0.4 },
+          { area: "right head edge", u: 0.99, v: 0.4 },
+          { area: "left shoulder edge", u: 0.01, v: 0.7 },
+          { area: "right shoulder edge", u: 0.99, v: 0.7 },
+          { area: "bottom center", u: 0.5, v: 0.99 },
+        ];
+        console.table(probes.map(({ area, u, v }) => ({
+          area,
+          u,
+          v,
+          fade: Number(getParticleFade(u, v, photoHeight).toFixed(3)),
+        })));
       }
 
       count = chosen.length;
@@ -188,7 +250,7 @@ export default function PixelatedPortraitReveal() {
       homeY = new Float32Array(count);
       targetX = new Float32Array(count);
       targetY = new Float32Array(count);
-      luminance = new Float32Array(count);
+      particleAlpha = new Float32Array(count);
       particleSize = new Float32Array(count);
       delay = new Float32Array(count);
       duration = new Float32Array(count);
@@ -205,8 +267,8 @@ export default function PixelatedPortraitReveal() {
         const sourceY = Math.floor(sourceIndex / columns);
         homeX[particle] = photoLeft + (sourceX + 0.5) * photoWidth / columns;
         homeY[particle] = photoTop + (sourceY + 0.5) * photoHeight / rows;
-        luminance[particle] = tonalValue[sourceIndex];
-        particleSize[particle] = cellSize * 0.72;
+        particleAlpha[particle] = chosenAlpha[particle];
+        particleSize[particle] = cellSize * 0.72 * chosenFade[particle] * chosenEdgeScale[particle];
 
         // Jittered regular grid gives the source pixels a deterministic, evenly spread destination.
         const gridX = particle % scatterColumns;
@@ -238,17 +300,22 @@ export default function PixelatedPortraitReveal() {
         const bubbleX = x - pointerX;
         const bubbleY = y - pointerY;
         const bubbleDistance = Math.max(1, Math.hypot(bubbleX, bubbleY));
-        const bubbleRadius = clamp(panelWidth * 0.16, 70, 150);
+        const bubbleRadius = clamp(panelWidth * 0.06, 26, 56) * 4.5;
         const bubbleInfluence = Math.sin(clamp(1 - bubbleDistance / bubbleRadius) * Math.PI / 2) * pointerStrength;
-        const bubblePush = bubbleInfluence * 12;
+        const bubblePush = bubbleInfluence * 18;
         x += (bubbleX / bubbleDistance) * bubblePush;
         y += (bubbleY / bubbleDistance) * bubblePush;
-        const alpha = clamp(0.06 + luminance[index] * 0.78) * 0.9 * (1 - q * 0.58);
+        const alpha = particleAlpha[index] * (1 - q * 0.58);
+        if (alpha < PARTICLE_FADE_CONFIG.discardAlphaBelow) {
+          bucketNext[index] = 0xffffffff;
+          continue;
+        }
         let bucket = 0;
         while (bucket < bucketLevels.length - 1 && alpha > bucketLevels[bucket]) bucket += 1;
         frameX[index] = x;
         frameY[index] = y;
-        frameSize[index] = particleSize[index] * (1 - q * 0.12) * (1 + bubbleInfluence * 0.65);
+        frameSize[index] = particleSize[index] * (1 - q * 0.12)
+          * (1 + bubbleInfluence * 0.9);
         bucketNext[index] = bucketHeads[bucket];
         bucketHeads[bucket] = index;
       }
@@ -260,7 +327,7 @@ export default function PixelatedPortraitReveal() {
           const size = frameSize[index];
           context.rect(frameX[index] - size / 2, frameY[index] - size / 2, size, size);
         }
-        context.fillStyle = "#e8ebe5";
+        context.fillStyle = "#e5ebe0";
         context.globalAlpha = (bucket + 0.5) / bucketLevels.length;
         context.fill();
       }
@@ -347,7 +414,7 @@ export default function PixelatedPortraitReveal() {
       const rect = panel.getBoundingClientRect();
       targetPointerX = event.clientX - rect.left;
       targetPointerY = event.clientY - rect.top;
-      targetPointerStrength = 1;
+      targetPointerStrength = 0.4;
       start();
     };
 

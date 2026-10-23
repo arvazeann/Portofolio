@@ -116,14 +116,6 @@ svg { width: 1rem; height: 1rem; stroke: currentColor; stroke-width: 1.5; }
     radial-gradient(circle, rgb(225 234 219 / 15%) 0.6px, transparent 0.85px) 0 0 / 24px 24px,
     #101310;
 }
-.hero::after {
-  position: absolute;
-  z-index: 3;
-  inset: 62% 0 0;
-  background: linear-gradient(180deg, transparent, rgb(16 19 16 / 55%) 55%, #101310 100%);
-  content: "";
-  pointer-events: none;
-}
 .hero-scroll.is-scroll-enhanced .hero {
   position: sticky;
   top: var(--hero-header-offset);
@@ -168,8 +160,8 @@ h1, h2, h3, p { margin-top: 0; }
 .hero h1 { margin-bottom: 0; font-size: clamp(1.35rem, 2.1vw, 1.8rem); font-weight: 500; letter-spacing: -0.06em; line-height: 1.08; }
 .hero h1 span { display: block; }
 .hero h1 .hero-title-accent { color: var(--green); }
-.hero-actions { position: absolute; z-index: 5; right: max(40px, calc((100vw - 1800px) / 2)); bottom: 4.4rem; display: flex; max-width: 42%; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.75rem; }
-.button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 0.7rem; border: 1px solid transparent; border-radius: 999px; padding: 0 1.25rem; font-size: var(--type-control); line-height: 1.35; transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+.hero-actions { position: absolute; z-index: 5; right: max(40px, calc((100vw - 1800px) / 2)); bottom: 1.5rem; display: flex; max-width: 42%; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.75rem; }
+.button { display: inline-flex; min-height: 54px; align-items: center; justify-content: center; gap: 0.7rem; border: 1px solid transparent; border-radius: 999px; padding: 0 1.4rem; font-size: var(--type-control); line-height: 1.35; transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
 .button:hover { transform: translateY(-2px); }
 .button:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
 .button-primary { background: var(--green); color: #141812; }
@@ -178,17 +170,16 @@ h1, h2, h3, p { margin-top: 0; }
 .button-secondary:hover { border-color: var(--green-dark); background: rgb(183 214 165 / 8%); color: var(--green); }
 .button-icon { display: inline-flex; width: 1rem; height: 1rem; flex: 0 0 auto; align-items: center; justify-content: center; }
 .button-icon svg { width: 0.9rem; height: 0.9rem; }
-.portrait-wrap { position: absolute; z-index: 1; top: calc(50% - 14px); left: 50%; width: min(74svh, 86vw, 840px); height: min(92svh, 920px); transform: translate(-50%, -50%); }
+.portrait-wrap { position: absolute; z-index: 1; top: calc(50% - 8px); left: 50%; width: min(74svh, 86vw, 840px); height: min(92svh, 920px); transform: translate(-50%, -50%); }
 .portrait-frame { position: relative; width: 100%; height: 100%; overflow: visible; background: transparent; }
 .portrait-photo {
   object-fit: cover;
   object-position: center 35%;
   image-rendering: pixelated;
   filter: grayscale(1) contrast(1.1);
-  mask-image: radial-gradient(ellipse 78% 77% at 50% 47%, #000 68%, transparent 100%);
   opacity: 0;
 }
-.portrait-static-fallback { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; image-rendering: pixelated; mask-image: radial-gradient(ellipse 78% 77% at 50% 47%, #000 68%, transparent 100%); transition: opacity 100ms linear; }
+.portrait-static-fallback { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; image-rendering: pixelated; filter: grayscale(1) sepia(0.08) hue-rotate(45deg) saturate(0.7) contrast(1.1); opacity: 0.9; transition: opacity 100ms linear; }
 .hero-particle-canvas { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
 
 .section-divider { border-top: 1px solid var(--line); }
@@ -295,9 +286,9 @@ h1, h2, h3, p { margin-top: 0; }
   .section-shell { width: min(100% - 48px, 680px); }
   .hero-scroll.is-scroll-enhanced { height: 190svh; }
   .hero-display-name { top: 63%; font-size: clamp(4.2rem, 12vw, 8.5rem); }
-  .portrait-wrap { top: calc(48% - 14px); width: min(64svh, 90vw, 660px); height: min(86svh, 780px); }
+  .portrait-wrap { top: calc(48% - 8px); width: min(64svh, 90vw, 660px); height: min(86svh, 780px); }
   .hero-copy { bottom: 1.5rem; left: 24px; width: min(360px, calc(48vw - 40px)); }
-  .hero-actions { right: 24px; bottom: 4.4rem; max-width: 46%; }
+  .hero-actions { right: 24px; bottom: 1.5rem; max-width: 46%; }
   .hero h1 { font-size: clamp(1.35rem, 2.6vw, 1.7rem); }
   .about-content { grid-template-columns: 1fr 0.85fr; gap: 2rem; }
   .project-card { grid-template-columns: 1fr 0.95fr; }
@@ -321,12 +312,12 @@ h1, h2, h3, p { margin-top: 0; }
   .hero-scroll { --hero-header-offset: 128px; }
   .hero-scroll.is-scroll-enhanced { height: 180svh; }
   .hero-display-name { top: 60%; width: calc(100% - 24px); font-size: clamp(2.5rem, 11vw, 4rem); letter-spacing: -0.09em; }
-  .portrait-wrap { top: calc(43% - 14px); width: min(43svh, calc(100vw - 32px)); height: min(132vw, 62svh); }
+  .portrait-wrap { top: calc(43% - 8px); width: min(43svh, calc(100vw - 32px)); height: min(132vw, 62svh); }
   .hero-copy { right: 20px; bottom: 10.5rem; left: 20px; width: auto; }
   .hero .eyebrow { gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.75rem; letter-spacing: 0.035em; }
   .hero h1 { margin-bottom: 0; font-size: clamp(1.25rem, 5.2vw, 1.55rem); }
   .hero-actions { right: 20px; bottom: 3.8rem; left: 20px; max-width: none; align-items: flex-start; flex-direction: column; gap: 0.5rem; }
-  .hero-actions .button { min-height: 46px; padding-inline: 1rem; }
+  .hero-actions .button { min-height: 50px; padding-inline: 1rem; }
   .about-section, .projects-section, .certificates-section, .journey-section { padding-block: 4.5rem; }
   .about-content, .journey-content { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.2rem; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
