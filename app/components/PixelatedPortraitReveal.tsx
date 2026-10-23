@@ -30,6 +30,22 @@ const PARTICLE_FADE_CONFIG = {
   discardAlphaBelow: 0.03,
 } as const;
 
+const SCROLL_SCATTER_CONFIG = {
+  progressMultiplier: 2,
+  phaseOffset: 0.03,
+  firstScrollKick: 0.08,
+  firstScrollRange: 0.025,
+  opacityFloorNear: 0.25,
+  opacityFloorFar: 0.8,
+  curveOffset: 18,
+  wobbleStart: 0.3,
+  wobbleRamp: 0.7,
+  wobbleAmplitudeNear: 3.2,
+  wobbleAmplitudeFar: 6,
+  wobbleFrequencyX: 0.0012,
+  wobbleFrequencyY: 0.001,
+} as const;
+
 function getParticleFade(u: number, v: number, portraitHeight: number) {
   const bottomPosition = v - PARTICLE_FADE_CONFIG.bottomOffsetPx / portraitHeight;
   const bottomFade = 1 - ease((bottomPosition - PARTICLE_FADE_CONFIG.bottomStart)
@@ -66,8 +82,12 @@ export default function PixelatedPortraitReveal() {
     let lastFrame = 0;
     let slowFrames = 0;
     let drawStride = 1;
-    let smoothedProgress = 0;
+    let currentProgress = 0;
     let targetProgress = 0;
+    let introProgress = 1;
+    let introStartedAt = 0;
+    let introActive = false;
+    let introRequested = false;
     let pointerX = 0;
     let pointerY = 0;
     let targetPointerX = 0;
@@ -91,13 +111,13 @@ export default function PixelatedPortraitReveal() {
     let targetY = new Float32Array();
     let particleAlpha = new Float32Array();
     let particleSize = new Float32Array();
-    let delay = new Float32Array();
-    let duration = new Float32Array();
+    let particlePhase = new Float32Array();
+    let particleDepth = new Float32Array();
     let frameX = new Float32Array();
     let frameY = new Float32Array();
     let frameSize = new Float32Array();
     let bucketNext = new Uint32Array();
-    const bucketLevels = [0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.78, 0.84, 0.9, 0.96];
+    const bucketLevels = Array.from({ length: 64 }, (_, index) => (index + 1) / 64);
     const bucketHeads = new Uint32Array(bucketLevels.length);
     const minFrameInterval = 1000 / 36;
     const updateParticleColor = () => {
@@ -106,9 +126,7 @@ export default function PixelatedPortraitReveal() {
     updateParticleColor();
 
     const getScrollProgress = () => {
-      const range = wrapper.offsetHeight - window.innerHeight;
-      if (range <= 0) return 0;
-      return clamp(-wrapper.getBoundingClientRect().top / range);
+      return clamp(window.scrollY / Math.max(1, panel.offsetHeight * 0.7));
     };
 
     const sizeCanvas = () => {
@@ -257,8 +275,8 @@ export default function PixelatedPortraitReveal() {
       targetY = new Float32Array(count);
       particleAlpha = new Float32Array(count);
       particleSize = new Float32Array(count);
-      delay = new Float32Array(count);
-      duration = new Float32Array(count);
+      particlePhase = new Float32Array(count);
+      particleDepth = new Float32Array(count);
       frameX = new Float32Array(count);
       frameY = new Float32Array(count);
       frameSize = new Float32Array(count);
@@ -266,6 +284,12 @@ export default function PixelatedPortraitReveal() {
 
       const scatterColumns = Math.ceil(Math.sqrt(count * panelWidth / Math.max(1, panelHeight)));
       const scatterRows = Math.ceil(count / scatterColumns);
+      const scatterSlots = new Uint32Array(count);
+      for (let slot = 0; slot < count; slot += 1) scatterSlots[slot] = slot;
+      for (let slot = count - 1; slot > 0; slot -= 1) {
+        const other = Math.floor(hash(slot + 7001) * (slot + 1));
+        [scatterSlots[slot], scatterSlots[other]] = [scatterSlots[other], scatterSlots[slot]];
+      }
       for (let particle = 0; particle < count; particle += 1) {
         const sourceIndex = chosen[particle];
         const sourceX = sourceIndex % columns;
@@ -274,34 +298,49 @@ export default function PixelatedPortraitReveal() {
         homeY[particle] = photoTop + (sourceY + 0.5) * photoHeight / rows;
         particleAlpha[particle] = chosenAlpha[particle];
         particleSize[particle] = cellSize * 0.72 * chosenFade[particle] * chosenEdgeScale[particle];
+        particlePhase[particle] = hash(particle + 223);
+        particleDepth[particle] = hash(particle + 811);
 
-        // Jittered regular grid gives the source pixels a deterministic, evenly spread destination.
-        const gridX = particle % scatterColumns;
-        const gridY = Math.floor(particle / scatterColumns);
+        // Evenly distribute destinations across the hero; each point keeps its source identity.
+        const destinationSlot = scatterSlots[particle];
+        const gridX = destinationSlot % scatterColumns;
+        const gridY = Math.floor(destinationSlot / scatterColumns);
         targetX[particle] = (gridX + 0.14 + hash(particle + 3001) * 0.72) * panelWidth / scatterColumns;
         targetY[particle] = (gridY + 0.14 + hash(particle + 4001) * 0.72) * panelHeight / scatterRows;
-
-        const x = sourceX / columns;
-        const y = sourceY / rows;
-        const edge = Math.min(x, y, 1 - x, 1 - y);
-        const edgeBias = 1 - clamp(edge * 2.2);
-        delay[particle] = 0.04 + 0.5 * (hash(particle + 223) * 0.7 + edgeBias * 0.18 + y * 0.12);
-        duration[particle] = Math.min(0.36 + hash(particle + 109) * 0.34, 1 - delay[particle]);
       }
       return true;
     };
 
-    const render = (progress: number) => {
+    const render = (progress: number, formationProgress = 1, now = performance.now()) => {
       context.clearRect(0, 0, panelWidth, panelHeight);
       bucketHeads.fill(0xffffffff);
+      const formation = ease(formationProgress);
       for (let index = 0; index < count; index += drawStride) {
-        const q = ease((progress - delay[index]) / duration[index]);
-        const xDelta = targetX[index] - homeX[index];
-        const yDelta = targetY[index] - homeY[index];
+        const phase = particlePhase[index];
+        const scatterPhase = clamp(progress * SCROLL_SCATTER_CONFIG.progressMultiplier
+          - phase * SCROLL_SCATTER_CONFIG.phaseOffset);
+        // Keep the first wheel movement visible instead of easing away the initial response.
+        const firstScrollKick = SCROLL_SCATTER_CONFIG.firstScrollKick
+          * ease(progress / SCROLL_SCATTER_CONFIG.firstScrollRange);
+        const q = Math.max(scatterPhase, firstScrollKick);
+        const formedX = targetX[index] + (homeX[index] - targetX[index]) * formation;
+        const formedY = targetY[index] + (homeY[index] - targetY[index]) * formation;
+        const xDelta = targetX[index] - formedX;
+        const yDelta = targetY[index] - formedY;
         const distance = Math.max(1, Math.hypot(xDelta, yDelta));
-        const curve = Math.sin(Math.PI * q) * 9;
-        let x = homeX[index] + xDelta * q - (yDelta / distance) * curve;
-        let y = homeY[index] + yDelta * q + (xDelta / distance) * curve;
+        const curve = Math.sin(Math.PI * q) * SCROLL_SCATTER_CONFIG.curveOffset * (phase - 0.5);
+        let x = formedX + xDelta * q - (yDelta / distance) * curve;
+        let y = formedY + yDelta * q + (xDelta / distance) * curve;
+        const depth = particleDepth[index];
+        const drift = q * ease((progress - SCROLL_SCATTER_CONFIG.wobbleStart)
+          / SCROLL_SCATTER_CONFIG.wobbleRamp);
+        const wobble = SCROLL_SCATTER_CONFIG.wobbleAmplitudeNear
+          + (1 - depth) * (SCROLL_SCATTER_CONFIG.wobbleAmplitudeFar
+            - SCROLL_SCATTER_CONFIG.wobbleAmplitudeNear);
+        x += Math.sin(now * SCROLL_SCATTER_CONFIG.wobbleFrequencyX + phase * Math.PI * 2)
+          * wobble * drift;
+        y += Math.cos(now * SCROLL_SCATTER_CONFIG.wobbleFrequencyY + phase * 9.1)
+          * wobble * drift;
         const bubbleX = x - pointerX;
         const bubbleY = y - pointerY;
         const bubbleDistance = Math.max(1, Math.hypot(bubbleX, bubbleY));
@@ -310,19 +349,22 @@ export default function PixelatedPortraitReveal() {
         const bubblePush = bubbleInfluence * 18;
         x += (bubbleX / bubbleDistance) * bubblePush;
         y += (bubbleY / bubbleDistance) * bubblePush;
-        // Scatter and fade each sampled source particle together so the portrait
-        // fully dissolves instead of leaving a faint grid at the end of the scroll.
-        const alpha = particleAlpha[index] * (1 - q);
-        if (alpha < PARTICLE_FADE_CONFIG.discardAlphaBelow) {
-          bucketNext[index] = 0xffffffff;
-          continue;
-        }
+        // Scatter each source particle from its fixed portrait anchor without dropping it.
+        const scatteredAlpha = SCROLL_SCATTER_CONFIG.opacityFloorNear
+          + (1 - depth) * (SCROLL_SCATTER_CONFIG.opacityFloorFar
+            - SCROLL_SCATTER_CONFIG.opacityFloorNear);
+        const land = ease((1 - q - 0.55) / 0.45);
+        // Keep the scattered portrait visible from the first frame, then gather it
+        // into the source image instead of fading it in from an empty canvas.
+        const introVisibility = 0.36 + formationProgress * 0.64;
+        const alpha = particleAlpha[index] * introVisibility
+          * (scatteredAlpha + (1 - scatteredAlpha) * land);
         let bucket = 0;
         while (bucket < bucketLevels.length - 1 && alpha > bucketLevels[bucket]) bucket += 1;
         frameX[index] = x;
         frameY[index] = y;
-        frameSize[index] = particleSize[index] * (1 - q * 0.12)
-          * (1 + bubbleInfluence * 0.9);
+        frameSize[index] = particleSize[index] * (0.48 + formation * 0.52)
+          * (1 - q * 0.12) * (1 + bubbleInfluence * 0.9);
         bucketNext[index] = bucketHeads[bucket];
         bucketHeads[bucket] = index;
       }
@@ -343,7 +385,7 @@ export default function PixelatedPortraitReveal() {
       fallback.style.opacity = "0";
     };
 
-    const drawStatic = () => render(0);
+    const drawStatic = () => render(0, 1);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible) start();
@@ -358,9 +400,12 @@ export default function PixelatedPortraitReveal() {
         return;
       }
       const started = performance.now();
-      smoothedProgress += (targetProgress - smoothedProgress) * 0.2;
-      const isSettled = Math.abs(targetProgress - smoothedProgress) < 0.001;
-      if (isSettled) smoothedProgress = targetProgress;
+      // Follow scroll directly so there is no perceptible wait before particles react.
+      currentProgress = targetProgress;
+      if (introActive) {
+        introProgress = clamp((now - introStartedAt) / 3000);
+        if (introProgress >= 1) introActive = false;
+      }
       pointerX += (targetPointerX - pointerX) * 0.28;
       pointerY += (targetPointerY - pointerY) * 0.28;
       pointerStrength += (targetPointerStrength - pointerStrength) * 0.24;
@@ -372,7 +417,7 @@ export default function PixelatedPortraitReveal() {
         pointerY = targetPointerY;
         pointerStrength = targetPointerStrength;
       }
-      render(smoothedProgress);
+      render(currentProgress, introProgress, now);
       const cost = performance.now() - started;
       slowFrames = cost > 20 ? slowFrames + 1 : Math.max(0, slowFrames - 2);
       if (slowFrames > 150 && drawStride < 4) {
@@ -380,12 +425,14 @@ export default function PixelatedPortraitReveal() {
         slowFrames = 0;
       }
       lastFrame = now;
-      if (!isSettled || !pointerIsSettled) raf = window.requestAnimationFrame(tick);
+      if (introActive || !pointerIsSettled || currentProgress >= SCROLL_SCATTER_CONFIG.wobbleStart) {
+        raf = window.requestAnimationFrame(tick);
+      }
     };
 
     function start() {
       if (!running || raf || !visible || document.hidden || reducedMotion.matches
-        || (Math.abs(targetProgress - smoothedProgress) < 0.001
+        || (!introActive && Math.abs(targetProgress - currentProgress) < 0.0001
           && Math.abs(targetPointerX - pointerX) < 0.5
           && Math.abs(targetPointerY - pointerY) < 0.5
           && Math.abs(targetPointerStrength - pointerStrength) < 0.01)) return;
@@ -397,6 +444,20 @@ export default function PixelatedPortraitReveal() {
       raf = 0;
     }
 
+    function syncIntroReveal() {
+      introRequested = true;
+      if (!count || reducedMotion.matches || debugMode) return;
+
+      const recordedStart = Number(document.documentElement.dataset.portraitRevealAt);
+      introStartedAt = Number.isFinite(recordedStart) && recordedStart > 0
+        ? recordedStart
+        : performance.now();
+      introProgress = clamp((performance.now() - introStartedAt) / 3000);
+      introActive = introProgress < 1;
+      if (!introActive) introProgress = 1;
+      start();
+    }
+
     const onResize = () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
@@ -404,8 +465,8 @@ export default function PixelatedPortraitReveal() {
         if (reducedMotion.matches || debugMode) drawStatic();
         else {
           targetProgress = getScrollProgress();
-          smoothedProgress = targetProgress;
-          render(smoothedProgress);
+          currentProgress = targetProgress;
+          render(currentProgress, introProgress);
         }
       }, 120);
     };
@@ -434,19 +495,29 @@ export default function PixelatedPortraitReveal() {
       if (!samplePhoto()) {
         return;
       }
+      const preloadActive = document.documentElement.dataset.preload === "1"
+        && !reducedMotion.matches && !debugMode;
+      introProgress = preloadActive ? 0 : 1;
       targetProgress = debugMode || reducedMotion.matches ? 0 : getScrollProgress();
-      smoothedProgress = targetProgress;
-      render(smoothedProgress);
+      currentProgress = targetProgress;
       running = !reducedMotion.matches && !debugMode;
+      if (preloadActive && (introRequested || document.documentElement.dataset.portraitRevealAt)) syncIntroReveal();
+      render(currentProgress, introProgress);
       observer.observe(wrapper);
       if (running && visible) start();
+    };
+
+    const onIntroReveal = () => {
+      syncIntroReveal();
     };
 
     const onMotionChange = () => {
       if (reducedMotion.matches) {
         running = false;
+        introActive = false;
+        introProgress = 1;
         targetProgress = 0;
-        smoothedProgress = 0;
+        currentProgress = 0;
         targetPointerStrength = 0;
         pointerStrength = 0;
         stop();
@@ -455,6 +526,7 @@ export default function PixelatedPortraitReveal() {
       } else {
         running = !debugMode;
         targetProgress = getScrollProgress();
+        currentProgress = targetProgress;
         if (count) start();
       }
     };
@@ -467,7 +539,7 @@ export default function PixelatedPortraitReveal() {
     const resizeObserver = new ResizeObserver(onResize);
     const themeObserver = new MutationObserver(() => {
       updateParticleColor();
-      if (count) render(smoothedProgress);
+      if (count) render(currentProgress, introProgress);
     });
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     resizeObserver.observe(panel);
@@ -478,7 +550,9 @@ export default function PixelatedPortraitReveal() {
     panel.addEventListener("pointerleave", onPointerLeave, { passive: true });
     document.addEventListener("visibilitychange", onVisibilityChange);
     image.addEventListener("load", onImageReady);
+    window.addEventListener("portfolio-intro-reveal", onIntroReveal);
     reducedMotion.addEventListener("change", onMotionChange);
+    if (document.documentElement.dataset.portraitRevealAt) syncIntroReveal();
     if (image.complete) onImageReady();
 
     return () => {
@@ -493,6 +567,7 @@ export default function PixelatedPortraitReveal() {
       panel.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       image.removeEventListener("load", onImageReady);
+      window.removeEventListener("portfolio-intro-reveal", onIntroReveal);
       reducedMotion.removeEventListener("change", onMotionChange);
       window.clearTimeout(resizeTimer);
       image.style.removeProperty("opacity");

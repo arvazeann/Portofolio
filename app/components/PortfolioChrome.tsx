@@ -122,49 +122,78 @@ export function ScrollProgress() {
 }
 
 export function Preloader() {
-  const [progress, setProgress] = useState(4);
-  const [typed, setTyped] = useState("");
+  const [introWord, setIntroWord] = useState("Portfolio");
   useEffect(() => {
     const root = document.documentElement;
     const overlay = document.getElementById("preloader");
     if (!overlay || root.dataset.preload !== "1") return;
-    const phrase = "> rafif arvazean";
-    let index = 0;
-    const typeTimer = window.setInterval(() => {
-      index += 1;
-      setTyped(phrase.slice(0, index));
-      if (index >= phrase.length) window.clearInterval(typeTimer);
-    }, 42);
-    const started = performance.now();
-    let frame = 0;
-    let done = false;
-    let readinessTimer = 0;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      window.clearInterval(typeTimer);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    let exitTimer = 0;
+    let morphTimer = 0;
+    let revealTimer = 0;
+    let navTimer = 0;
+    const nameMorphInterval = 146;
+    const wordDropStart = 2500;
+    const wordDropDuration = 1600;
+    const portraitRevealStart = wordDropStart + wordDropDuration;
+    const introExitStart = portraitRevealStart + 3100;
+    const nameTimer = window.setTimeout(() => {
+      overlay.classList.add("is-name");
+      root.classList.add("intro-name");
+
+      const original = "Portfolio";
+      const target = "ARVAZEAN";
+      let step = 0;
+      const morphNextLetter = () => {
+        step += 1;
+        setIntroWord(`${target.slice(0, Math.min(step, target.length))}${original.slice(step)}`);
+        if (step < original.length) morphTimer = window.setTimeout(morphNextLetter, nameMorphInterval);
+      };
+      morphTimer = window.setTimeout(morphNextLetter, nameMorphInterval);
+    }, 1100);
+    const dropTimer = window.setTimeout(() => {
+      overlay.classList.add("is-drop");
+      root.classList.add("intro-drop");
+    }, wordDropStart);
+    // Start the portrait only after the longer name drop has finished.
+    revealTimer = window.setTimeout(() => {
+      root.dataset.portraitRevealAt = String(performance.now());
+      root.classList.add("portrait-reveal-active");
+      window.dispatchEvent(new Event("portfolio-intro-reveal"));
+      navTimer = window.setTimeout(() => root.classList.add("nav-intro-active"), 2000);
+    }, portraitRevealStart);
+    const finishTimer = window.setTimeout(() => {
       root.classList.add("preloader-exit");
-      window.setTimeout(() => {
+      exitTimer = window.setTimeout(() => {
         delete root.dataset.preload;
+        delete root.dataset.portraitRevealAt;
+        root.classList.remove("intro-name", "intro-drop", "portrait-reveal-active", "nav-intro-active");
         root.classList.remove("preloader-exit");
+        document.body.style.overflow = previousOverflow;
       }, 670);
+    }, introExitStart);
+    return () => {
+      window.clearTimeout(nameTimer);
+      window.clearTimeout(dropTimer);
+      window.clearTimeout(finishTimer);
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(revealTimer);
+      window.clearTimeout(navTimer);
+      window.clearTimeout(morphTimer);
+      delete root.dataset.portraitRevealAt;
+      root.classList.remove("intro-name", "intro-drop", "portrait-reveal-active", "nav-intro-active", "preloader-exit");
+      document.body.style.overflow = previousOverflow;
     };
-    const tick = () => {
-      const elapsed = performance.now() - started;
-      setProgress(Math.min(96, 4 + elapsed / 2350 * 92));
-      const portrait = document.querySelector<HTMLImageElement>(".portrait-photo");
-      const ready = Boolean(portrait?.complete && portrait.naturalWidth && document.fonts.status === "loaded");
-      if (elapsed >= 1250 && ready) finish();
-      else if (elapsed >= 2200) finish();
-      else frame = window.requestAnimationFrame(tick);
-    };
-    readinessTimer = window.setTimeout(finish, 2300);
-    frame = window.requestAnimationFrame(tick);
-    return () => { window.clearInterval(typeTimer); window.clearTimeout(readinessTimer); window.cancelAnimationFrame(frame); };
   }, []);
   return (
     <div id="preloader" className="preloader" aria-hidden="true">
-      <div className="preloader-content"><span className="preloader-line">{typed || ">"}<span className="preloader-cursor" /></span><span className="preloader-track"><span style={{ transform: `scaleX(${progress / 100})` }} /></span></div>
+      <div className="preloader-content">
+        <div className="preloader-wordmark" aria-label="Portfolio">
+          <span className="preloader-word">{introWord}</span>
+        </div>
+        <span className="preloader-caption">PORTOFOLIO PERSONAL</span>
+      </div>
     </div>
   );
 }
