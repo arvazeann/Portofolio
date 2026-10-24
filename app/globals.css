@@ -331,12 +331,12 @@ h1, h2, h3, p { margin-top: 0; }
   .nav-list { flex-wrap: wrap; gap: 0.25rem 1.15rem; }
   .nav-list a { min-height: 40px; }
   .hero-scroll { --hero-header-offset: 128px; }
-  .hero-display-name { top: 60%; width: calc(100% - 24px); font-size: clamp(2.15rem, 9.6vw, 3.5rem); letter-spacing: -0.08em; }
-  .portrait-wrap { top: calc(43% - 8px); width: min(43svh, calc(100vw - 32px)); height: min(132vw, 62svh); }
-  .hero-copy { right: 20px; bottom: 10.5rem; left: 20px; width: auto; }
+  .hero-display-name { top: 58.5%; width: calc(100% - 24px); font-size: clamp(2.15rem, 9.6vw, 3.5rem); letter-spacing: -0.08em; }
+  .portrait-wrap { top: calc(35.5% - 8px); width: min(40svh, calc(100vw - 48px)); height: min(120vw, 58svh); }
+  .hero-copy { right: 20px; bottom: 14rem; left: 20px; width: auto; }
   .hero .eyebrow { gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.75rem; letter-spacing: 0.035em; }
   .hero h1 { margin-bottom: 0; font-size: clamp(1.25rem, 5.2vw, 1.55rem); }
-  .hero-actions { right: 20px; bottom: 3.8rem; left: 20px; max-width: none; align-items: flex-start; flex-direction: column; gap: 0.5rem; }
+  .hero-actions { right: 20px; bottom: 6.5rem; left: 20px; max-width: none; align-items: flex-start; flex-direction: column; gap: 0.5rem; }
   .hero-actions .button { min-height: 50px; padding-inline: 1rem; }
   .about-section, .projects-section, .journey-section { padding-block: 4.5rem; }
   .about-content, .journey-content { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.2rem; }
@@ -633,6 +633,11 @@ html.preloader-exit .preloader { clip-path: inset(0 0 100% 0); transition: clip-
   .journey-org-mark { width: 34px; height: 34px; }
   .about-stats { gap: 0.8rem 1.3rem; }
   .marquee-track { animation-duration: 42s; }
+}
+
+@media (max-width: 360px) {
+  .hero-display-name { top: 55.8%; }
+  .portrait-wrap { top: calc(32.3% - 8px); }
 }
 
 :root[data-theme="light"] .hero { background-image: radial-gradient(ellipse at 50% 42%, rgb(255 255 255 / 50%), transparent 38rem), radial-gradient(circle, var(--grid-color) 0.6px, transparent 0.85px); }
