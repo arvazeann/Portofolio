@@ -348,6 +348,8 @@ h1, h2, h3, p { margin-top: 0; }
   .project-screenshot--home { top: 17%; left: 4%; width: 76%; }
   .project-screenshot--catalog { right: 4%; bottom: 6%; width: 52%; }
   .terminal-window { width: min(100%, 360px); }
+  .project-visual--terminal { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.9rem; }
+  .project-visual--terminal .visual-caption { position: static; align-self: flex-start; width: 100%; }
   .terminal-body { min-height: 185px; padding: 0.9rem 1rem; }
   .project-details { padding: 1.7rem 1.4rem 1.9rem; }
   .journey-content { gap: 2rem; }
@@ -627,7 +629,7 @@ html.preloader-exit .preloader { clip-path: inset(0 0 100% 0); transition: clip-
   .journey-timeline-list::before, .journey-timeline-list::after { left: -0.95rem; }
   .journey-node { left: -1.25rem; }
   .journey-date { margin-left: 3.1rem; }
-  .journey-filter { flex-wrap: nowrap; overflow-x: auto; margin-right: -20px; padding: 0 20px 0.35rem 0; scrollbar-width: thin; }
+  .journey-filter { flex-wrap: wrap; overflow: visible; margin-right: 0; padding: 0; }
   .journey-filter button { flex: 0 0 auto; }
   .journey-card-body { grid-template-columns: 1fr; }
   .journey-org-mark { width: 34px; height: 34px; }

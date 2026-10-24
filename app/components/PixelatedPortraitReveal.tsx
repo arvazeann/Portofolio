@@ -38,6 +38,12 @@ const SCROLL_SCATTER_CONFIG = {
   opacityFloorNear: 0.25,
   opacityFloorFar: 0.8,
   curveOffset: 18,
+  wobbleStart: 0.3,
+  wobbleRamp: 0.7,
+  wobbleAmplitudeNear: 3.2,
+  wobbleAmplitudeFar: 6,
+  wobbleFrequencyX: 0.0012,
+  wobbleFrequencyY: 0.001,
 } as const;
 
 const INTRO_HANDOFF_DURATION = 240;
@@ -87,6 +93,12 @@ export default function PixelatedPortraitReveal() {
     let introHandoffPending = false;
     let introHandoffActive = false;
     let introHandoffStartedAt = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    let targetPointerX = 0;
+    let targetPointerY = 0;
+    let pointerStrength = 0;
+    let targetPointerStrength = 0;
     let pixelRatio = 1;
     let panelWidth = 0;
     let panelHeight = 0;
@@ -341,6 +353,24 @@ export default function PixelatedPortraitReveal() {
         let x = formedX + xDelta * q - (yDelta / distance) * curve;
         let y = formedY + yDelta * q + (xDelta / distance) * curve;
         const depth = particleDepth[index];
+        const drift = q * ease((progress - SCROLL_SCATTER_CONFIG.wobbleStart)
+          / SCROLL_SCATTER_CONFIG.wobbleRamp);
+        const wobble = SCROLL_SCATTER_CONFIG.wobbleAmplitudeNear
+          + (1 - depth) * (SCROLL_SCATTER_CONFIG.wobbleAmplitudeFar
+            - SCROLL_SCATTER_CONFIG.wobbleAmplitudeNear);
+        x += Math.sin(now * SCROLL_SCATTER_CONFIG.wobbleFrequencyX + phase * Math.PI * 2)
+          * wobble * drift;
+        y += Math.cos(now * SCROLL_SCATTER_CONFIG.wobbleFrequencyY + phase * 9.1)
+          * wobble * drift;
+        const bubbleX = x - pointerX;
+        const bubbleY = y - pointerY;
+        const bubbleDistance = Math.max(1, Math.hypot(bubbleX, bubbleY));
+        const bubbleRadius = clamp(panelWidth * 0.06, 26, 56) * 4.5;
+        const bubbleInfluence = Math.sin(clamp(1 - bubbleDistance / bubbleRadius) * Math.PI / 2)
+          * pointerStrength;
+        const bubblePush = bubbleInfluence * 18;
+        x += (bubbleX / bubbleDistance) * bubblePush;
+        y += (bubbleY / bubbleDistance) * bubblePush;
         if (introHandoffPending) {
           introHandoffOffsetX[index] = introHandoffStartX[index] - x;
           introHandoffOffsetY[index] = introHandoffStartY[index] - y;
@@ -362,7 +392,7 @@ export default function PixelatedPortraitReveal() {
         frameX[index] = x;
         frameY[index] = y;
         frameSize[index] = particleSize[index] * (0.48 + formation * 0.52)
-          * (1 - q * 0.12);
+          * (1 - q * 0.12) * (1 + bubbleInfluence * 0.9);
         bucketNext[index] = bucketHeads[bucket];
         bucketHeads[bucket] = index;
       }
@@ -406,6 +436,17 @@ export default function PixelatedPortraitReveal() {
         introProgress = clamp((now - introStartedAt) / 3000);
         if (introProgress >= 1) introActive = false;
       }
+      pointerX += (targetPointerX - pointerX) * 0.28;
+      pointerY += (targetPointerY - pointerY) * 0.28;
+      pointerStrength += (targetPointerStrength - pointerStrength) * 0.24;
+      const pointerIsSettled = Math.abs(targetPointerX - pointerX) < 0.5
+        && Math.abs(targetPointerY - pointerY) < 0.5
+        && Math.abs(targetPointerStrength - pointerStrength) < 0.01;
+      if (pointerIsSettled) {
+        pointerX = targetPointerX;
+        pointerY = targetPointerY;
+        pointerStrength = targetPointerStrength;
+      }
       render(currentProgress, introProgress, now);
       const cost = performance.now() - started;
       slowFrames = cost > 20 ? slowFrames + 1 : Math.max(0, slowFrames - 2);
@@ -414,7 +455,8 @@ export default function PixelatedPortraitReveal() {
         slowFrames = 0;
       }
       lastFrame = now;
-      if (introActive || introHandoffActive) {
+      if (introActive || introHandoffActive || !pointerIsSettled
+        || currentProgress >= SCROLL_SCATTER_CONFIG.wobbleStart) {
         raf = window.requestAnimationFrame(tick);
       }
     };
@@ -422,7 +464,11 @@ export default function PixelatedPortraitReveal() {
     function start() {
       if (!running || raf || !visible || document.hidden || reducedMotion.matches
         || (!introActive && !introHandoffActive && !introHandoffPending
-          && Math.abs(targetProgress - currentProgress) < 0.0001)) return;
+          && Math.abs(targetProgress - currentProgress) < 0.0001
+          && Math.abs(targetPointerX - pointerX) < 0.5
+          && Math.abs(targetPointerY - pointerY) < 0.5
+          && Math.abs(targetPointerStrength - pointerStrength) < 0.01
+          && currentProgress < SCROLL_SCATTER_CONFIG.wobbleStart)) return;
       raf = window.requestAnimationFrame(tick);
     }
 
@@ -473,6 +519,20 @@ export default function PixelatedPortraitReveal() {
       start();
     };
 
+    const onPointerMove = (event: PointerEvent) => {
+      if (debugMode || reducedMotion.matches || event.pointerType === "touch") return;
+      const rect = panel.getBoundingClientRect();
+      targetPointerX = event.clientX - rect.left;
+      targetPointerY = event.clientY - rect.top;
+      targetPointerStrength = 0.4;
+      start();
+    };
+
+    const onPointerLeave = () => {
+      targetPointerStrength = 0;
+      start();
+    };
+
     const onImageReady = () => {
       if (!samplePhoto()) {
         return;
@@ -500,6 +560,8 @@ export default function PixelatedPortraitReveal() {
         introProgress = 1;
         targetProgress = 0;
         currentProgress = 0;
+        targetPointerStrength = 0;
+        pointerStrength = 0;
         introHandoffActive = false;
         introHandoffPending = false;
         stop();
@@ -528,6 +590,8 @@ export default function PixelatedPortraitReveal() {
     resizeObserver.observe(image);
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
+    panel.addEventListener("pointermove", onPointerMove, { passive: true });
+    panel.addEventListener("pointerleave", onPointerLeave, { passive: true });
     document.addEventListener("visibilitychange", onVisibilityChange);
     image.addEventListener("load", onImageReady);
     window.addEventListener("portfolio-intro-reveal", onIntroReveal);
@@ -543,6 +607,8 @@ export default function PixelatedPortraitReveal() {
       themeObserver.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
+      panel.removeEventListener("pointermove", onPointerMove);
+      panel.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       image.removeEventListener("load", onImageReady);
       window.removeEventListener("portfolio-intro-reveal", onIntroReveal);
