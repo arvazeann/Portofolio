@@ -143,7 +143,7 @@ export function Preloader() {
       root.classList.add("intro-name");
 
       const original = "Portfolio";
-      const target = "ARVAZEAN";
+      const target = "ARVAZEAN.";
       let step = 0;
       const morphNextLetter = () => {
         step += 1;
@@ -153,6 +153,7 @@ export function Preloader() {
       morphTimer = window.setTimeout(morphNextLetter, nameMorphInterval);
     }, 1100);
     const dropTimer = window.setTimeout(() => {
+      setIntroWord("ARVAZEAN.");
       overlay.classList.add("is-drop");
       root.classList.add("intro-drop");
     }, wordDropStart);

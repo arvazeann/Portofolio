@@ -98,7 +98,7 @@ export default async function Home() {
       <main id="konten">
         <section className="hero-scroll is-scroll-enhanced" id="beranda" aria-labelledby="hero-title">
           <div className="hero hero-panel">
-            <p className="hero-display-name" aria-hidden="true">ARVAZEAN</p>
+            <p className="hero-display-name" aria-hidden="true">ARVAZEAN.</p>
             <div className="portrait-wrap hero-entry hero-entry--portrait">
               <div className="portrait-frame">
                 <Image
